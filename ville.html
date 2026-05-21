@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Destination révélée — Budapest</title>
+<style>
+  :root {
+    --rose: #e8789a;
+    --blush: #f5c6d8;
+    --cream: #fff8f5;
+    --gold: #c9873a;
+    --dark: #3a2030;
+    --shadow: rgba(58, 32, 48, .32);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    overflow: hidden;
+    font-family: Lato, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--cream);
+    background: #180d15;
+  }
+
+  .scene {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+  }
+
+  .city-image {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image:
+      linear-gradient(180deg, rgba(58,32,48,.35), rgba(58,32,48,.74)),
+      url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Danube_and_Hungarian_Parliament_Building_by_night.jpg/1280px-Danube_and_Hungarian_Parliament_Building_by_night.jpg");
+    background-size: cover;
+    background-position: center;
+    filter: blur(28px) saturate(.7) brightness(.78);
+    transform: scale(1.1);
+    transition: filter 4.2s ease, transform 4.2s ease;
+  }
+
+  .scene.revealed .city-image {
+    filter: blur(0) saturate(1.02) brightness(.9);
+    transform: scale(1);
+  }
+
+  .scan {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, transparent, rgba(255,248,245,.16), transparent),
+      repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0 1px, transparent 1px 6px);
+    transform: translateX(-100%);
+    animation: scan 3.2s ease-in-out forwards;
+    mix-blend-mode: screen;
+  }
+
+  @keyframes scan {
+    to { transform: translateX(100%); }
+  }
+
+  .panel {
+    width: min(720px, calc(100% - 32px));
+    padding: clamp(26px, 7vw, 54px);
+    text-align: center;
+    border: 1px solid rgba(245,198,216,.45);
+    border-radius: 10px;
+    background: rgba(58,32,48,.58);
+    box-shadow: 0 24px 80px var(--shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  .status {
+    color: var(--blush);
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .progress {
+    height: 8px;
+    margin: 22px auto 0;
+    border: 1px solid rgba(245,198,216,.5);
+    background: rgba(255,248,245,.12);
+    overflow: hidden;
+  }
+
+  .progress span {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--rose), var(--gold));
+    animation: load 3.7s ease forwards;
+  }
+
+  @keyframes load {
+    70% { width: 84%; }
+    100% { width: 100%; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity .75s ease, transform .75s ease;
+  }
+
+  .scene.revealed .reveal {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  h1 {
+    margin: 24px 0 8px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 12vw, 7.4rem);
+    line-height: .88;
+    color: #fff8f5;
+    letter-spacing: .08em;
+    text-shadow: 0 12px 40px rgba(0,0,0,.42);
+  }
+
+  .dates {
+    color: #fff0b8;
+    font-size: clamp(1.05rem, 3.5vw, 1.55rem);
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .message {
+    max-width: 500px;
+    margin: 18px auto 0;
+    color: rgba(255,248,245,.9);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+
+  .btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 18px;
+    background: var(--cream);
+    color: var(--dark);
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .btn.primary {
+    background: var(--rose);
+    color: #fff;
+  }
+
+  .credit {
+    position: fixed;
+    right: 12px;
+    bottom: 10px;
+    color: rgba(255,248,245,.68);
+    font-size: .68rem;
+  }
+
+  .credit a {
+    color: inherit;
+  }
+
+  @media (max-width: 560px) {
+    body { overflow-y: auto; }
+    .scene {
+      min-height: 100svh;
+      padding: 18px 0;
+      align-content: center;
+    }
+    .city-image {
+      background-position: center top;
+    }
+    .panel {
+      width: calc(100% - 24px);
+      padding: 24px 16px;
+      border-radius: 12px;
+    }
+    .status {
+      font-size: .68rem;
+      line-height: 1.35;
+    }
+    h1 {
+      margin-top: 20px;
+      font-size: clamp(2.25rem, 15vw, 4.2rem);
+      letter-spacing: .04em;
+    }
+    .dates {
+      font-size: .95rem;
+      line-height: 1.35;
+    }
+    .message {
+      margin-top: 14px;
+      font-size: .92rem;
+    }
+    .actions {
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 13px 14px;
+      font-size: .78rem;
+    }
+    .credit { position: static; padding: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<main class="scene" id="scene">
+  <div class="city-image" aria-hidden="true"></div>
+  <div class="scan" aria-hidden="true"></div>
+
+  <section class="panel" aria-live="polite">
+    <div class="status" id="status">Identification de la ville...</div>
+    <div class="progress"><span></span></div>
+
+    <div class="reveal">
+      <h1>Budapest</h1>
+      <div class="dates">Du 9 juin au 13 juin</div>
+      <p class="message">Destination confirmée. Prépare ta valise.</p>
+      <div class="actions">
+        <button class="btn primary" type="button" onclick="location.reload()">Revoir la révélation</button>
+        <a class="btn" href="carte_grattage.html">Retour à la carte</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="credit">
+    Photo : Florian Fèvre, via
+    <a href="https://commons.wikimedia.org/wiki/File:Danube_and_Hungarian_Parliament_Building_by_night.jpg">Wikimedia Commons</a>
+  </div>
+</main>
+
+<script>
+const scene = document.getElementById('scene');
+const statusEl = document.getElementById('status');
+
+setTimeout(() => {
+  scene.classList.add('revealed');
+  statusEl.textContent = 'Ville identifiée';
+}, 3900);
+</script>
+</body>
+</html>

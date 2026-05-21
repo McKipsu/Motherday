@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌸 Mot Mêlée — Fête des Mères</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:   #e8789a;
+    --blush:  #f5c6d8;
+    --cream:  #fff8f5;
+    --gold:   #c9873a;
+    --dark:   #3a2030;
+    --green:  #6ab187;
+    --shadow: rgba(200,100,130,.18);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    background-image:
+      radial-gradient(circle at 10% 20%, #fce4ec55 0%, transparent 50%),
+      radial-gradient(circle at 90% 80%, #f8bbd055 0%, transparent 50%);
+  }
+
+  /* ── Header ── */
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    color: var(--dark);
+    letter-spacing: .02em;
+    line-height: 1.1;
+  }
+  header h1 span { color: var(--rose); font-style: italic; }
+  header p {
+    font-size: .85rem; color: #9a7080; margin-top: 6px; letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .petal { font-size: 1.4rem; }
+
+  /* ── Layout ── */
+  .game { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+
+  /* ── Grid ── */
+  .grid-wrap {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px var(--shadow);
+    border: 2px solid var(--blush);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    position: relative;
+    touch-action: none;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(8, 48px);
+    grid-template-rows: repeat(8, 48px);
+    gap: 4px;
+  }
+  .cell {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem; font-weight: 700;
+    color: var(--dark);
+    cursor: pointer;
+    transition: background .12s, transform .1s, color .15s;
+    border: 1.5px solid transparent;
+    position: relative;
+  }
+  .cell:hover { background: var(--blush); transform: scale(1.08); }
+  .cell.selecting {
+    background: var(--blush);
+    border-color: var(--rose);
+    transform: scale(1.1);
+    color: var(--dark);
+  }
+  .cell.found {
+    background: linear-gradient(135deg, var(--rose), #e8a4bc);
+    color: #fff;
+    border-color: transparent;
+  }
+  .cell.secret-revealed {
+    background: linear-gradient(135deg, #f6d860, var(--gold));
+    color: #fff;
+    animation: pulse 1s ease infinite alternate;
+  }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+  /* ── Word list ── */
+  .sidebar {
+    display: flex; flex-direction: column; gap: 16px; min-width: 200px;
+  }
+  .word-list {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 2px solid var(--blush);
+  }
+  .word-list h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; color: var(--rose);
+    margin-bottom: 14px; letter-spacing: .04em;
+    border-bottom: 1px solid var(--blush); padding-bottom: 8px;
+  }
+  .word-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 5px 0; font-size: .95rem; color: var(--dark);
+    transition: all .3s;
+  }
+  .word-item.done {
+    color: var(--green);
+    text-decoration: line-through;
+    text-decoration-color: var(--green);
+  }
+  .word-item .check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--blush);
+    flex-shrink: 0;
+    transition: all .3s; display:flex; align-items:center; justify-content:center;
+    font-size:.7rem;
+  }
+  .word-item.done .check {
+    background: var(--green); border-color: var(--green); color:#fff;
+  }
+
+  /* ── Score badge ── */
+  .score-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 2px solid var(--blush);
+    text-align: center;
+  }
+  .score-box .count {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; color: var(--rose); font-weight: 700;
+  }
+  .score-box .label { font-size: .78rem; color: #9a7080; text-transform: uppercase; letter-spacing: .08em; }
+
+  /* ── Secret reveal ── */
+  .secret-box {
+    background: linear-gradient(135deg, #fff8e1, #fce4ec);
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 2px solid #f6d860;
+    text-align: center;
+    display: none;
+    animation: fadeIn .6s ease;
+  }
+  .secret-box.show { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+  .secret-box h3 { font-family:'Playfair Display',serif; color:var(--gold); margin-bottom:6px; }
+  .secret-word { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--dark); letter-spacing:.2em; }
+
+  /* ── Wrong flash ── */
+  .grid-wrap.wrong { animation: shake .4s ease; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-6px)}
+    40%{transform:translateX(6px)}
+    60%{transform:translateX(-4px)}
+    80%{transform:translateX(4px)}
+  }
+
+  /* ── Mission terminal ── */
+  .mission-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(232,120,154,.32), transparent 34%),
+      radial-gradient(circle at 80% 82%, rgba(246,216,96,.18), transparent 34%),
+      linear-gradient(135deg, #fff8f5, #f9dbe7);
+    animation: fadeIn .45s ease;
+  }
+  .mission-overlay.show { display: flex; }
+  .mission-panel {
+    width: min(920px, 100%);
+    height: min(680px, calc(100vh - 40px));
+    border: 1px solid rgba(232,120,154,.58);
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(58,32,48,.98), rgba(32,18,31,.98));
+    box-shadow: 0 24px 80px rgba(200,100,130,.32), inset 0 0 42px rgba(232,120,154,.12);
+    color: #fff8f5;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .mission-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,248,245,.04) 0,
+      rgba(255,248,245,.04) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+    mix-blend-mode: screen;
+    opacity: .38;
+  }
+  .mission-topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(232,120,154,.32);
+    background: rgba(255,248,245,.06);
+    color: #f5c6d8;
+    font-size: .78rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .terminal-output {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 24px;
+    padding-bottom: 90px;
+    font-size: clamp(.85rem, 2vw, 1rem);
+    line-height: 1.75;
+  }
+  .terminal-line {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-height: 1.75em;
+    color: #fff8f5;
+    text-shadow: 0 0 12px rgba(232,120,154,.24);
+  }
+  .terminal-line.dim { color: #e8a4bc; }
+  .terminal-line.warning { color: #f6d860; }
+  .terminal-line.flight {
+    margin: 10px 0;
+    padding: 8px 12px;
+    border: 1px solid rgba(246,216,96,.68);
+    background: linear-gradient(90deg, rgba(246,216,96,.15), rgba(232,120,154,.16));
+    color: #fff0b8;
+    font-weight: 700;
+    letter-spacing: .08em;
+  }
+  .prompt { color: #f5c6d8; flex: 0 0 auto; }
+  .cursor::after {
+    content: "_";
+    display: inline-block;
+    color: #f5c6d8;
+    animation: blink .75s steps(2, start) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .progress-row {
+    margin: 12px 0 18px;
+    color: #f5c6d8;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 6px;
+    font-size: .78rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .progress-track {
+    height: 12px;
+    border: 1px solid rgba(245,198,216,.5);
+    background: rgba(255,248,245,.08);
+    overflow: hidden;
+  }
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #e8789a, #f6d860);
+    box-shadow: 0 0 18px rgba(232,120,154,.42);
+    transition: width .12s linear;
+  }
+  .date-result { color: #fff0b8; font-weight: 700; }
+  .terminal-error {
+    margin-top: 12px;
+    color: #ff4d6d;
+    font-size: clamp(1.35rem, 6vw, 3rem);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-shadow: 2px 0 #f5c6d8, -2px 0 #f6d860, 0 0 24px rgba(255,77,109,.55);
+    animation: glitch .32s steps(2, end) infinite;
+  }
+  @keyframes glitch {
+    0% { transform: translate(0); filter: hue-rotate(0deg); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(2px, 2px); }
+    100% { transform: translate(0); filter: hue-rotate(18deg); }
+  }
+  .mission-actions {
+    display: none;
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    z-index: 1;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .mission-actions.show { display: flex; }
+  .mission-button {
+    background: #fff8f5;
+    color: #3a2030;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: .86rem;
+    cursor: pointer;
+    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .mission-button:hover { background: #f6d860; }
+  .mission-button.primary {
+    background: #f6d860;
+    color: #3a2030;
+    box-shadow: 0 0 22px rgba(246,216,96,.24);
+  }
+  .mission-button.primary:hover { background: #fff0b8; }
+
+  /* ── Confetti ── */
+  .confetti { position:fixed; pointer-events:none; inset:0; overflow:hidden; z-index:99; }
+  .confetti-piece {
+    position:absolute; top:-20px;
+    width:10px; height:10px; border-radius:2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); opacity:0; }
+  }
+
+  @media (max-width: 540px) {
+    body { padding: 14px 10px 28px; }
+    header { margin-bottom: 16px; }
+    header p { font-size: .72rem; }
+    .grid-wrap { width: 100%; max-width: 380px; padding: 12px; border-radius: 16px; }
+    .grid {
+      width: 100%;
+      aspect-ratio: 1;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      grid-template-rows: repeat(8, minmax(0, 1fr));
+      gap: 3px;
+    }
+    .cell {
+      width: auto;
+      height: auto;
+      min-width: 0;
+      min-height: 0;
+      border-radius: 8px;
+      font-size: clamp(.9rem, 5vw, 1.08rem);
+    }
+    .game { width: 100%; gap: 14px; }
+    .sidebar { width: 100%; max-width: 380px; min-width: 0; }
+    .word-list { padding: 16px 18px; }
+    .word-item { padding: 7px 0; }
+    .mission-overlay { padding: 10px; }
+    .mission-panel { height: calc(100svh - 20px); }
+    .mission-topbar { flex-direction: column; gap: 6px; }
+    .terminal-output { padding: 16px; padding-bottom: 116px; font-size: .78rem; }
+    .terminal-line { gap: 7px; }
+    .mission-actions { left: 14px; right: 14px; bottom: 14px; justify-content: stretch; }
+    .mission-button { flex: 1 1 100%; min-height: 46px; padding: 13px 12px; text-align: center; }
+    .terminal-error { font-size: clamp(1.15rem, 9vw, 2rem); }
+  }
+
+  @media (max-width: 360px) {
+    .grid-wrap { max-width: 340px; }
+    .terminal-output { font-size: .72rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="petal">🌸🌷🌸</div>
+  <h1>Mot <span>Mêlée</span></h1>
+  <p>Fête des Mères &nbsp;·&nbsp; Grille 8×8</p>
+</header>
+
+<div class="game">
+  <div class="grid-wrap" id="gridWrap">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="sidebar">
+    <div class="score-box">
+      <div class="count"><span id="found">0</span>/<span id="total">0</span></div>
+      <div class="label">Mots trouvés</div>
+    </div>
+    <div class="word-list">
+      <h3>🔍 Mots à trouver</h3>
+      <div id="wordList"></div>
+    </div>
+    <div class="secret-box" id="secretBox">
+      <h3>✨ Mot mystère révélé !</h3>
+      <div class="secret-word" id="secretWord"></div>
+    </div>
+  </div>
+</div>
+
+<div class="confetti" id="confetti"></div>
+<div class="mission-overlay" id="mission">
+  <div class="mission-panel">
+    <div class="mission-topbar">
+      <span>Mission secrète // Fête des Mères</span>
+      <span>Accès voyageuse : autorisé</span>
+    </div>
+    <div class="terminal-output" id="terminalOutput"></div>
+    <div class="mission-actions" id="missionActions">
+      <a class="mission-button primary" href="carte_grattage.html">Trouve la destination</a>
+      <button class="mission-button" onclick="location.reload()">Relancer la grille</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data injected by Python ──────────────────────────────────
+const GRID_DATA = [["R", "U", "E", "H", "N", "O", "B", "S"], ["B", "C", "A", "D", "E", "A", "U", "E"], ["I", "A", "M", "O", "U", "R", "L", "S"], ["S", "L", "V", "O", "P", "L", "I", "R"], ["O", "I", "Y", "R", "I", "A", "C", "U"], ["U", "N", "I", "M", "G", "E", "R", "E"], ["S", "S", "A", "F", "E", "T", "E", "L"], ["E", "F", "N", "A", "M", "A", "M", "F"]];
+const PLACEMENTS = [["SURPRISE", [[0, 7], [1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1], [7, 0]]], ["FAMILLE", [[7, 1], [6, 2], [5, 3], [4, 4], [3, 5], [2, 6], [1, 7]]], ["BONHEUR", [[0, 6], [0, 5], [0, 4], [0, 3], [0, 2], [0, 1], [0, 0]]], ["FLEURS", [[7, 7], [6, 7], [5, 7], [4, 7], [3, 7], [2, 7]]], ["BISOUS", [[1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0]]], ["CADEAU", [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6]]], ["MAMAN", [[7, 6], [7, 5], [7, 4], [7, 3], [7, 2]]], ["AMOUR", [[2, 1], [2, 2], [2, 3], [2, 4], [2, 5]]], ["CALIN", [[1, 1], [2, 1], [3, 1], [4, 1], [5, 1]]], ["MERCI", [[7, 6], [6, 6], [5, 6], [4, 6], [3, 6]]], ["FETE", [[6, 3], [6, 4], [6, 5], [6, 6]]]];
+const SECRET_CELLS = [[3, 2, "V"], [3, 3, "O"], [4, 2, "Y"], [4, 5, "A"], [5, 4, "G"], [5, 5, "E"]];
+const SECRET_WORD = "VOYAGE";
+const WORDS = ["MAMAN", "AMOUR", "FLEURS", "BISOUS", "FETE", "CALIN", "SURPRISE", "FAMILLE", "MERCI", "CADEAU", "BONHEUR"];
+
+// ── State ────────────────────────────────────────────────────
+let selecting = false;
+let selStart = null;
+let selCells = [];
+let foundWords = new Set();
+let secretFound = false;
+
+// Build lookup: word → set of "r,c" strings
+const wordCellMap = {};
+PLACEMENTS.forEach(([word, cells]) => {
+  wordCellMap[word] = cells.map(([r,c]) => `${r},${c}`);
+});
+const secretCellSet = new Set(SECRET_CELLS.map(([r,c]) => `${r},${c}`));
+
+// ── Build DOM ────────────────────────────────────────────────
+const gridEl = document.getElementById('grid');
+const wordListEl = document.getElementById('wordList');
+const foundEl = document.getElementById('found');
+const totalEl = document.getElementById('total');
+const secretBox = document.getElementById('secretBox');
+const secretWordEl = document.getElementById('secretWord');
+const missionEl = document.getElementById('mission');
+const terminalOutputEl = document.getElementById('terminalOutput');
+const missionActionsEl = document.getElementById('missionActions');
+let missionStarted = false;
+
+totalEl.textContent = WORDS.length;
+
+// Grid cells
+GRID_DATA.forEach((row, r) => {
+  row.forEach((ch, c) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = ch;
+    cell.dataset.r = r;
+    cell.dataset.c = c;
+    cell.addEventListener('mousedown', onDown);
+    cell.addEventListener('mouseenter', onEnter);
+    cell.addEventListener('touchstart', onTouchStart, {passive:false});
+    cell.addEventListener('touchmove', onTouchMove, {passive:false});
+    gridEl.appendChild(cell);
+  });
+});
+
+// Word list
+WORDS.forEach(w => {
+  const item = document.createElement('div');
+  item.className = 'word-item';
+  item.id = 'w_' + w;
+  item.innerHTML = `<div class="check"></div><span>${w}</span>`;
+  wordListEl.appendChild(item);
+});
+
+document.addEventListener('mouseup', onUp);
+document.addEventListener('touchend', onUp);
+
+// ── Helpers ──────────────────────────────────────────────────
+function cellAt(r, c) {
+  return gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+}
+function clearSelection() {
+  selCells.forEach(([r,c]) => {
+    const el = cellAt(r,c);
+    if (el && !el.classList.contains('found')) el.classList.remove('selecting');
+  });
+  selCells = [];
+}
+
+function getLineCells(r0, c0, r1, c1) {
+  const dr = Math.sign(r1-r0), dc = Math.sign(c1-c0);
+  if (dr===0 && dc===0) return [[r0,c0]];
+  // Must be straight line or diagonal
+  const distR = Math.abs(r1-r0), distC = Math.abs(c1-c0);
+  if (dr!==0 && dc!==0 && distR !== distC) return null;
+  const cells = [];
+  let r=r0, c=c0;
+  const steps = Math.max(distR, distC);
+  for (let i=0; i<=steps; i++) {
+    cells.push([r,c]); r+=dr; c+=dc;
+  }
+  return cells;
+}
+
+function checkSelection() {
+  if (selCells.length < 2) { clearSelection(); return; }
+  const word = selCells.map(([r,c]) => GRID_DATA[r][c]).join('');
+  const wordRev = word.split('').reverse().join('');
+  const match = WORDS.find(w => (w===word || w===wordRev) && !foundWords.has(w));
+  if (match) {
+    foundWords.add(match);
+    const key = `${selCells[0][0]},${selCells[0][1]}`;
+    selCells.forEach(([r,c]) => {
+      const el = cellAt(r,c);
+      el.classList.remove('selecting');
+      el.classList.add('found');
+    });
+    document.getElementById('w_' + match).className = 'word-item done';
+    document.querySelector('#w_' + match + ' .check').textContent = '✓';
+    foundEl.textContent = foundWords.size;
+    if (foundWords.size === WORDS.length) setTimeout(revealSecret, 600);
+  } else {
+    document.getElementById('gridWrap').classList.add('wrong');
+    setTimeout(() => document.getElementById('gridWrap').classList.remove('wrong'), 400);
+    clearSelection();
+  }
+}
+
+function revealSecret() {
+  SECRET_CELLS.forEach(([r,c,ch]) => {
+    cellAt(r,c).classList.add('secret-revealed');
+  });
+  secretWordEl.textContent = SECRET_WORD;
+  secretBox.classList.add('show');
+  spawnConfetti();
+  setTimeout(startMissionSequence, 6800);
+}
+
+const missionSteps = [
+  { type: 'line', text: 'INITIALISATION DU SYSTÈME...', tone: 'dim' },
+  { type: 'line', text: 'Connexion chiffrée établie.' },
+  { type: 'line', text: 'Chargement du profil voyageuse...' },
+  { type: 'progress', label: 'Profil voyageuse' },
+  { type: 'line', text: 'Critères : culture · gastronomie · architecture.' },
+  { type: 'dates' },
+  { type: 'line', text: 'Recherche de la destination parfaite...' },
+  { type: 'progress', label: 'Destination parfaite' },
+  { type: 'line', text: '⚠ DONNÉES CRYPTÉES — DÉCRYPTAGE EN COURS', tone: 'warning' },
+  { type: 'line', text: 'VOL RYANAIR TROUVÉ', tone: 'flight' },
+  { type: 'line', text: 'Coordonnées GPS : 47.4979° N, 19.0402° E' },
+  { type: 'line', text: 'Analyse des coordonnées GPS...' },
+  { type: 'error' }
+];
+
+const dateCandidates = [
+  '12 Mai au 16 Mai',
+  '15 Mai au 19 Mai',
+  '18 Mai au 22 Mai',
+  '21 Mai au 25 Mai',
+  '24 Mai au 28 Mai',
+  '27 Mai au 31 Mai',
+  '31 Mai au 4 Juin',
+  '2 Juin au 6 Juin',
+  '4 Juin au 8 Juin',
+  '5 Juin au 9 Juin',
+  '7 Juin au 11 Juin',
+  '8 Juin au 12 Juin',
+  '10 Juin au 14 Juin',
+  '9 Juin au 13 Juin'
+];
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+function startMissionSequence() {
+  if (missionStarted) return;
+  missionStarted = true;
+  missionEl.classList.add('show');
+  terminalOutputEl.innerHTML = '';
+  missionActionsEl.classList.remove('show');
+  runMissionSequence();
+}
+
+async function runMissionSequence() {
+  for (const step of missionSteps) {
+    if (step.type === 'line') await typeTerminalLine(step.text, step.tone);
+    if (step.type === 'progress') await runProgressBar(step.label);
+    if (step.type === 'dates') await runDateSearch();
+    if (step.type === 'error') await showTerminalError();
+    terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight;
+  }
+  missionActionsEl.classList.add('show');
+}
+
+async function typeTerminalLine(text, tone = '') {
+  const line = document.createElement('div');
+  line.className = `terminal-line ${tone}`.trim();
+  const prompt = document.createElement('span');
+  prompt.className = 'prompt';
+  prompt.textContent = '>';
+  const content = document.createElement('span');
+  content.className = 'cursor';
+  line.append(prompt, content);
+  terminalOutputEl.appendChild(line);
+
+  for (const ch of text) {
+    content.textContent += ch;
+    await delay(ch === ' ' ? 12 : 28);
+  }
+  content.classList.remove('cursor');
+  await delay(240);
+}
+
+async function runProgressBar(label) {
+  const row = document.createElement('div');
+  row.className = 'progress-row';
+  row.innerHTML = `
+    <div class="progress-label"><span>${label}</span><span class="progress-value">0%</span></div>
+    <div class="progress-track"><div class="progress-fill"></div></div>
+  `;
+  terminalOutputEl.appendChild(row);
+  const fill = row.querySelector('.progress-fill');
+  const value = row.querySelector('.progress-value');
+  for (let pct = 0; pct <= 100; pct += 5) {
+    fill.style.width = `${pct}%`;
+    value.textContent = `${pct}%`;
+    await delay(72);
+  }
+  await delay(360);
+}
+
+async function runDateSearch() {
+  const line = document.createElement('div');
+  line.className = 'terminal-line';
+  const prompt = document.createElement('span');
+  prompt.className = 'prompt';
+  prompt.textContent = '>';
+  const label = document.createElement('span');
+  label.textContent = 'Recherche des dates → ';
+  const date = document.createElement('span');
+  line.append(prompt, label, date);
+  terminalOutputEl.appendChild(line);
+
+  for (const candidate of dateCandidates) {
+    date.textContent = candidate;
+    await delay(candidate === '9 Juin au 13 Juin' ? 700 : 300);
+  }
+  date.className = 'date-result';
+  await delay(320);
+}
+
+async function showTerminalError() {
+  const error = document.createElement('div');
+  error.className = 'terminal-error';
+  error.textContent = 'ERROR ERROR';
+  terminalOutputEl.appendChild(error);
+  await delay(1100);
+}
+
+function spawnConfetti() {
+  const colors = ['#e8789a','#f6d860','#6ab187','#c9873a','#a8d8ea'];
+  const confEl = document.getElementById('confetti');
+  for (let i=0; i<80; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      background:${colors[Math.random()*colors.length|0]};
+      width:${6+Math.random()*10}px; height:${6+Math.random()*10}px;
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      animation-duration:${1.5+Math.random()*2}s;
+      animation-delay:${Math.random()*1.5}s;
+    `;
+    confEl.appendChild(p);
+  }
+  setTimeout(()=>confEl.innerHTML='', 5000);
+}
+
+// ── Mouse events ─────────────────────────────────────────────
+function onDown(e) {
+  e.preventDefault();
+  selecting = true;
+  const r=+this.dataset.r, c=+this.dataset.c;
+  selStart = [r,c];
+  clearSelection();
+  selCells = [[r,c]];
+  this.classList.add('selecting');
+}
+function onEnter(e) {
+  if (!selecting) return;
+  const r=+this.dataset.r, c=+this.dataset.c;
+  const line = getLineCells(selStart[0], selStart[1], r, c);
+  if (!line) return;
+  clearSelection();
+  selCells = line;
+  line.forEach(([lr,lc]) => cellAt(lr,lc).classList.add('selecting'));
+}
+function onUp(e) {
+  if (!selecting) return;
+  selecting = false;
+  checkSelection();
+}
+
+// ── Touch events ─────────────────────────────────────────────
+function cellFromTouch(touch) {
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  return el && el.classList.contains('cell') ? el : null;
+}
+function onTouchStart(e) {
+  e.preventDefault();
+  const cell = cellFromTouch(e.touches[0]);
+  if (!cell) return;
+  selecting = true;
+  const r=+cell.dataset.r, c=+cell.dataset.c;
+  selStart=[r,c]; clearSelection();
+  selCells=[[r,c]]; cell.classList.add('selecting');
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!selecting) return;
+  const cell = cellFromTouch(e.touches[0]);
+  if (!cell) return;
+  const r=+cell.dataset.r, c=+cell.dataset.c;
+  const line = getLineCells(selStart[0],selStart[1],r,c);
+  if (!line) return;
+  clearSelection(); selCells=line;
+  line.forEach(([lr,lc])=>cellAt(lr,lc).classList.add('selecting'));
+}
+</script>
+</body>
+</html>

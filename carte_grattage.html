@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte à gratter — Destination secrète</title>
+<style>
+  :root {
+    --rose: #e8789a;
+    --blush: #f5c6d8;
+    --cream: #fff8f5;
+    --gold: #c9873a;
+    --dark: #3a2030;
+    --green: #6ab187;
+    --shadow: rgba(200, 100, 130, .18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 14px;
+    font-family: Lato, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--dark);
+    background:
+      radial-gradient(circle at 14% 18%, #fce4ec 0%, transparent 38%),
+      radial-gradient(circle at 86% 84%, #f8bbd0 0%, transparent 36%),
+      var(--cream);
+  }
+
+  .shell {
+    width: min(960px, 100%);
+    text-align: center;
+  }
+
+  .eyebrow {
+    margin-bottom: 8px;
+    color: #a56d82;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.8rem, 6vw, 3.15rem);
+    line-height: 1;
+    color: var(--dark);
+  }
+
+  h1 span {
+    color: var(--rose);
+    font-style: italic;
+  }
+
+  .scratch-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    max-height: 640px;
+    margin: 0 auto;
+    border: 2px solid var(--blush);
+    border-radius: 30px;
+    background: #fff;
+    box-shadow: 0 18px 60px var(--shadow);
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  #scratchCanvas {
+    cursor: grab;
+  }
+
+  #scratchCanvas:active {
+    cursor: grabbing;
+  }
+
+  .stage-badge {
+    position: absolute;
+    left: 22px;
+    top: 18px;
+    z-index: 3;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 248, 245, .88);
+    color: #a56d82;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(200, 100, 130, .14);
+  }
+
+  .result-card {
+    position: absolute;
+    inset: auto 24px 24px;
+    z-index: 4;
+    display: none;
+    padding: 16px 18px;
+    border: 1px solid rgba(232, 120, 154, .4);
+    border-radius: 18px;
+    background: rgba(255, 248, 245, .92);
+    box-shadow: 0 12px 36px rgba(200, 100, 130, .18);
+    color: var(--dark);
+  }
+
+  .result-card.show {
+    display: block;
+    animation: floatIn .35s ease;
+  }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-card strong {
+    display: block;
+    color: var(--rose);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    letter-spacing: .08em;
+  }
+
+  .result-actions {
+    display: none;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .result-actions.show {
+    display: flex;
+  }
+
+  .next-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 11px 18px;
+    background: var(--rose);
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    box-shadow: 0 8px 24px rgba(232, 120, 154, .26);
+  }
+
+  .next-btn:hover { background: #d85f84; }
+
+  .progress-wrap {
+    margin-top: 18px;
+  }
+
+  .progress-track {
+    height: 5px;
+    border-radius: 999px;
+    background: #f0c2d1;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--rose), var(--gold));
+    transition: width .12s linear;
+  }
+
+  .progress-label {
+    margin-top: 10px;
+    color: #b4778d;
+    font-size: .82rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .percent {
+    display: inline-block;
+    min-width: 4ch;
+    color: var(--rose);
+  }
+
+  .reset-btn {
+    margin-top: 18px;
+    border: 0;
+    border-radius: 999px;
+    padding: 11px 18px;
+    background: var(--rose);
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(232, 120, 154, .26);
+    min-height: 44px;
+  }
+
+  .reset-btn:hover { background: #d85f84; }
+
+  .loading {
+    padding: 34px 14px;
+    color: #a56d82;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 620px) {
+    body {
+      align-items: flex-start;
+      padding: 10px;
+    }
+    .shell {
+      display: flex;
+      min-height: calc(100svh - 20px);
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .eyebrow {
+      margin-bottom: 5px;
+      font-size: .68rem;
+    }
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(1.55rem, 8vw, 2.2rem);
+    }
+    .scratch-frame {
+      flex: 1;
+      min-height: 58svh;
+      max-height: none;
+      aspect-ratio: auto;
+      border-radius: 20px;
+      border-width: 1.5px;
+    }
+    .stage-badge {
+      left: 10px;
+      top: 10px;
+      padding: 8px 10px;
+      font-size: .64rem;
+      letter-spacing: .12em;
+    }
+    .result-card {
+      inset: auto 10px 10px;
+      padding: 14px 14px;
+      border-radius: 14px;
+    }
+    .result-card strong {
+      font-size: clamp(1.25rem, 7vw, 1.8rem);
+    }
+    .next-btn,
+    .reset-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 13px 14px;
+      font-size: .78rem;
+    }
+    .progress-wrap {
+      margin-top: 12px;
+    }
+    .progress-label {
+      font-size: .72rem;
+      line-height: 1.35;
+    }
+    .loading {
+      padding: 18px 10px;
+      font-size: .74rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    body { padding: 8px; }
+    .shell { min-height: calc(100svh - 16px); }
+    .scratch-frame { min-height: 56svh; }
+    .stage-badge { font-size: .58rem; }
+  }
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="eyebrow">Mission destination</div>
+  <h1>Carte <span>à gratter</span></h1>
+
+  <section class="scratch-frame" id="scratchFrame" aria-label="Carte à gratter">
+    <canvas id="mapCanvas" width="960" height="600"></canvas>
+    <canvas id="scratchCanvas" width="960" height="600"></canvas>
+    <div class="stage-badge" id="stageBadge">Étape 1 / 2</div>
+    <div class="result-card" id="resultCard">
+      <strong id="resultTitle"></strong>
+      <span id="resultText"></span>
+      <div class="result-actions" id="resultActions">
+        <a class="next-btn" href="ville.html">Révéler la ville</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">
+      Gratte pour révéler la carte... <span class="percent" id="percent">0%</span>
+    </div>
+  </div>
+
+  <button class="reset-btn" id="resetBtn" type="button">Recommencer</button>
+  <div class="loading" id="loading">Chargement de la carte...</div>
+</main>
+
+<script>
+const GEOJSON_URL = 'europe_scratch.geo.json';
+const WIDTH = 960;
+const HEIGHT = 600;
+const MAP_BOUNDS = { minLon: -12, maxLon: 45, minLat: 34, maxLat: 72 };
+const MAP_BACKGROUND = '#fff8f5';
+const COUNTRY_FILL = '#fff8f5';
+const BORDER_COLOR = '#d89ab0';
+const SCRATCH_COUNTRY_FILL = '#c9c9c9';
+const WRONG_COUNTRY_FILL = '#ef6f7a';
+const CORRECT_COUNTRY_FILL = '#77c88a';
+const SELECTED_COUNTRY_BORDER = '#7d4658';
+
+const mapCanvas = document.getElementById('mapCanvas');
+const scratchCanvas = document.getElementById('scratchCanvas');
+const mapCtx = mapCanvas.getContext('2d');
+const scratchCtx = scratchCanvas.getContext('2d', { willReadFrequently: true });
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const percentEl = document.getElementById('percent');
+const stageBadge = document.getElementById('stageBadge');
+const resultCard = document.getElementById('resultCard');
+const resultTitle = document.getElementById('resultTitle');
+const resultText = document.getElementById('resultText');
+const resultActions = document.getElementById('resultActions');
+const resetBtn = document.getElementById('resetBtn');
+const loadingEl = document.getElementById('loading');
+
+let geoData;
+let projection;
+let stage = 1;
+let isScratching = false;
+let lastPoint = null;
+let activeMaskCanvas;
+let activeMaskData;
+let activeMaskPixels = 0;
+let activePath = null;
+let complete = false;
+let rafPending = false;
+let featurePaths = [];
+let countryStates = new Map();
+let stageTransitionTimer = null;
+
+fetch(GEOJSON_URL)
+  .then(response => {
+    if (!response.ok) throw new Error('GeoJSON introuvable');
+    return response.json();
+  })
+  .then(data => {
+    geoData = data;
+    projection = createProjection(data);
+    featurePaths = geoData.features.map(feature => ({
+      feature,
+      path: featurePath(feature)
+    }));
+    loadingEl.style.display = 'none';
+    startStage(1);
+  })
+  .catch(() => {
+    loadingEl.textContent = 'Impossible de charger la carte.';
+  });
+
+resetBtn.addEventListener('click', () => startStage(1));
+
+scratchCanvas.addEventListener('pointerdown', event => {
+  event.preventDefault();
+  if (complete || !geoData) return;
+  scratchCanvas.setPointerCapture(event.pointerId);
+  isScratching = true;
+  lastPoint = getCanvasPoint(event);
+  if (stage === 2) scratchCountryAt(lastPoint);
+  else scratchAt(lastPoint, lastPoint);
+});
+
+scratchCanvas.addEventListener('pointermove', event => {
+  event.preventDefault();
+  if (!isScratching || complete) return;
+  const point = getCanvasPoint(event);
+  if (stage === 2) scratchCountryAt(point);
+  else scratchAt(lastPoint || point, point);
+  lastPoint = point;
+});
+
+scratchCanvas.addEventListener('pointerup', stopScratch);
+scratchCanvas.addEventListener('pointercancel', stopScratch);
+scratchCanvas.addEventListener('pointerleave', stopScratch);
+
+function stopScratch() {
+  isScratching = false;
+  lastPoint = null;
+}
+
+function startStage(nextStage) {
+  if (stageTransitionTimer) {
+    clearTimeout(stageTransitionTimer);
+    stageTransitionTimer = null;
+  }
+  stage = nextStage;
+  complete = false;
+  resultCard.classList.remove('show');
+  resultActions.classList.remove('show');
+  progressFill.style.width = '0%';
+  percentEl.textContent = stage === 1 ? '0%' : '0 pays';
+  stageBadge.textContent = stage === 1 ? 'Étape 1 / 2' : 'Étape 2 / 2';
+  progressLabel.firstChild.textContent = stage === 1
+    ? 'Gratte pour révéler la carte... '
+    : 'Gratte les pays... ';
+  if (stage === 2) countryStates = new Map();
+
+  drawMap(stage);
+  buildActiveMask(stage);
+  drawScratchLayer(stage);
+}
+
+function drawMap(currentStage) {
+  mapCtx.clearRect(0, 0, WIDTH, HEIGHT);
+  mapCtx.fillStyle = MAP_BACKGROUND;
+  mapCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  featurePaths.forEach(({ feature, path }) => {
+    const state = countryStates.get(countryKey(feature));
+    const isSelected = state === 'wrong' || state === 'correct';
+    mapCtx.fillStyle = getCountryFill(currentStage, state);
+    mapCtx.strokeStyle = isSelected ? SELECTED_COUNTRY_BORDER : BORDER_COLOR;
+    mapCtx.lineWidth = isSelected ? 2.2 : 1.15;
+    mapCtx.fill(path, 'evenodd');
+    mapCtx.stroke(path);
+  });
+
+  drawLabels(currentStage);
+}
+
+function drawLabels(currentStage) {
+  mapCtx.save();
+  mapCtx.fillStyle = '#7d4658';
+  mapCtx.font = '700 15px Lato, sans-serif';
+  mapCtx.textAlign = 'center';
+  mapCtx.fillText('Europe', WIDTH / 2, 42);
+  mapCtx.restore();
+}
+
+function getCountryFill(currentStage, state) {
+  if (state === 'correct') return CORRECT_COUNTRY_FILL;
+  if (state === 'wrong') return WRONG_COUNTRY_FILL;
+  return currentStage === 2 ? SCRATCH_COUNTRY_FILL : COUNTRY_FILL;
+}
+
+function drawScratchLayer(currentStage) {
+  scratchCtx.globalCompositeOperation = 'source-over';
+  scratchCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+  if (currentStage === 2) return;
+
+  const foil = scratchCtx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+  foil.addColorStop(0, '#f8f9fb');
+  foil.addColorStop(.48, '#cfd4dc');
+  foil.addColorStop(1, '#eef0f3');
+  scratchCtx.fillStyle = foil;
+  roundRect(scratchCtx, 0, 0, WIDTH, HEIGHT, 30);
+  scratchCtx.fill();
+
+  scratchCtx.save();
+  scratchCtx.globalAlpha = .2;
+  scratchCtx.strokeStyle = '#ffffff';
+  for (let y = 7; y < HEIGHT; y += 6) {
+    scratchCtx.beginPath();
+    scratchCtx.moveTo(0, y);
+    scratchCtx.lineTo(WIDTH, y + Math.sin(y * .04) * 2);
+    scratchCtx.stroke();
+  }
+  scratchCtx.restore();
+
+  scratchCtx.save();
+  scratchCtx.fillStyle = '#aeb5bf';
+  scratchCtx.textAlign = 'center';
+  scratchCtx.font = '800 34px Lato, sans-serif';
+  scratchCtx.fillText('✨ GRATTE ICI ✨', WIDTH / 2, HEIGHT / 2 - 8);
+  scratchCtx.font = '600 18px Lato, sans-serif';
+  scratchCtx.fillStyle = 'rgba(140, 150, 164, .62)';
+  scratchCtx.fillText("Ta destination secrète t'attend...", WIDTH / 2, HEIGHT / 2 + 34);
+  scratchCtx.restore();
+}
+
+function buildActiveMask(currentStage) {
+  activeMaskCanvas = document.createElement('canvas');
+  activeMaskCanvas.width = WIDTH;
+  activeMaskCanvas.height = HEIGHT;
+  const maskCtx = activeMaskCanvas.getContext('2d');
+
+  if (currentStage === 1) {
+    maskCtx.fillStyle = '#fff';
+    roundRect(maskCtx, 0, 0, WIDTH, HEIGHT, 30);
+    maskCtx.fill();
+    activePath = null;
+  } else {
+    activePath = null;
+  }
+
+  activeMaskData = maskCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+  activeMaskPixels = 0;
+  for (let i = 3; i < activeMaskData.length; i += 4) {
+    if (activeMaskData[i] > 0) activeMaskPixels++;
+  }
+}
+
+function scratchAt(from, to) {
+  if (!activeMaskCanvas) return;
+
+  const brush = 34;
+  const eraseCanvas = document.createElement('canvas');
+  eraseCanvas.width = WIDTH;
+  eraseCanvas.height = HEIGHT;
+  const eraseCtx = eraseCanvas.getContext('2d');
+
+  eraseCtx.lineCap = 'round';
+  eraseCtx.lineJoin = 'round';
+  eraseCtx.strokeStyle = '#fff';
+  eraseCtx.fillStyle = '#fff';
+  eraseCtx.lineWidth = brush * 2;
+  eraseCtx.beginPath();
+  eraseCtx.moveTo(from.x, from.y);
+  eraseCtx.lineTo(to.x, to.y);
+  eraseCtx.stroke();
+  eraseCtx.beginPath();
+  eraseCtx.arc(to.x, to.y, brush, 0, Math.PI * 2);
+  eraseCtx.fill();
+
+  eraseCtx.globalCompositeOperation = 'destination-in';
+  eraseCtx.drawImage(activeMaskCanvas, 0, 0);
+
+  scratchCtx.save();
+  scratchCtx.globalCompositeOperation = 'destination-out';
+  scratchCtx.drawImage(eraseCanvas, 0, 0);
+  scratchCtx.restore();
+
+  requestProgressCheck();
+}
+
+function scratchCountryAt(point) {
+  const entry = countryAtPoint(point) || countryNearPoint(point, isCoarsePointer() ? 22 : 10);
+  if (!entry) return;
+
+  const key = countryKey(entry.feature);
+  if (countryStates.has(key)) return;
+
+  const isCorrect = isHungaryFeature(entry.feature);
+  countryStates.set(key, isCorrect ? 'correct' : 'wrong');
+  drawMap(stage);
+  updateCountryProgress();
+
+  if (isCorrect) completeStage();
+}
+
+function countryAtPoint(point) {
+  for (let i = featurePaths.length - 1; i >= 0; i--) {
+    const entry = featurePaths[i];
+    if (mapCtx.isPointInPath(entry.path, point.x, point.y, 'evenodd')) return entry;
+  }
+  return null;
+}
+
+function countryNearPoint(point, radius) {
+  const offsets = [
+    [0, -radius], [radius, 0], [0, radius], [-radius, 0],
+    [radius * .7, radius * .7], [radius * .7, -radius * .7],
+    [-radius * .7, radius * .7], [-radius * .7, -radius * .7]
+  ];
+
+  for (const [dx, dy] of offsets) {
+    const entry = countryAtPoint({ x: point.x + dx, y: point.y + dy });
+    if (entry) return entry;
+  }
+  return null;
+}
+
+function isCoarsePointer() {
+  return window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+}
+
+function updateCountryProgress() {
+  const tried = countryStates.size;
+  const ratio = tried / featurePaths.length;
+  progressFill.style.width = `${Math.min(96, Math.round(ratio * 100))}%`;
+  percentEl.textContent = `${tried} pays`;
+}
+
+function requestProgressCheck() {
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => {
+    rafPending = false;
+    updateProgress();
+  });
+}
+
+function updateProgress() {
+  if (!activeMaskPixels) return;
+  const scratchData = scratchCtx.getImageData(0, 0, WIDTH, HEIGHT).data;
+  let cleared = 0;
+
+  for (let i = 3; i < scratchData.length; i += 4) {
+    if (activeMaskData[i] > 0 && scratchData[i] < 20) cleared++;
+  }
+
+  const threshold = stage === 1 ? .68 : .82;
+  const progress = Math.min(100, Math.round((cleared / activeMaskPixels) / threshold * 100));
+  progressFill.style.width = `${progress}%`;
+  percentEl.textContent = `${progress}%`;
+
+  if (progress >= 100) completeStage();
+}
+
+function completeStage() {
+  if (complete) return;
+  complete = true;
+  progressFill.style.width = '100%';
+  percentEl.textContent = '100%';
+  scratchCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+  if (stage === 1) {
+    resultTitle.textContent = 'Carte révélée';
+    resultText.textContent = 'Prépare la prochaine étape...';
+    resultCard.classList.add('show');
+    stageTransitionTimer = setTimeout(() => startStage(2), 5200);
+    return;
+  }
+
+  resultTitle.textContent = 'HONGRIE';
+  resultText.textContent = 'Destination localisée. Coordonnées confirmées.';
+  resultCard.classList.add('show');
+  resultActions.classList.add('show');
+  progressFill.style.width = '100%';
+  percentEl.textContent = 'OK';
+  progressLabel.firstChild.textContent = 'Destination révélée... ';
+}
+
+function createProjection(data) {
+  const minX = MAP_BOUNDS.minLon;
+  const maxX = MAP_BOUNDS.maxLon;
+  const minY = MAP_BOUNDS.minLat;
+  const maxY = MAP_BOUNDS.maxLat;
+  const padding = 48;
+  const scale = Math.min(
+    (WIDTH - padding * 2) / (maxX - minX),
+    (HEIGHT - padding * 2) / (maxY - minY)
+  );
+  const offsetX = (WIDTH - (maxX - minX) * scale) / 2;
+  const offsetY = (HEIGHT - (maxY - minY) * scale) / 2;
+
+  return ([lon, lat]) => ({
+    x: offsetX + (lon - minX) * scale,
+    y: offsetY + (maxY - lat) * scale
+  });
+}
+
+function getGeoBounds(features) {
+  const bounds = { minLon: Infinity, minLat: Infinity, maxLon: -Infinity, maxLat: -Infinity };
+  features.forEach(feature => forEachCoordinate(feature.geometry, ([lon, lat]) => {
+    bounds.minLon = Math.min(bounds.minLon, lon);
+    bounds.maxLon = Math.max(bounds.maxLon, lon);
+    bounds.minLat = Math.min(bounds.minLat, lat);
+    bounds.maxLat = Math.max(bounds.maxLat, lat);
+  }));
+  return bounds;
+}
+
+function featurePath(feature) {
+  const path = new Path2D();
+  if (!feature || !feature.geometry) return path;
+  const polygons = feature.geometry.type === 'Polygon'
+    ? [feature.geometry.coordinates]
+    : feature.geometry.coordinates;
+
+  polygons.forEach(polygon => {
+    polygon.forEach(ring => {
+      ring.forEach(([lon, lat], index) => {
+        const point = projection([lon, lat]);
+        if (index === 0) path.moveTo(point.x, point.y);
+        else path.lineTo(point.x, point.y);
+      });
+      path.closePath();
+    });
+  });
+  return path;
+}
+
+function projectedFeatureCenter(feature) {
+  let sumX = 0;
+  let sumY = 0;
+  let count = 0;
+  forEachCoordinate(feature.geometry, coord => {
+    const point = projection(coord);
+    sumX += point.x;
+    sumY += point.y;
+    count++;
+  });
+  return { x: sumX / count, y: sumY / count };
+}
+
+function forEachCoordinate(geometry, callback) {
+  if (!geometry) return;
+  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+  polygons.forEach(polygon => polygon.forEach(ring => ring.forEach(callback)));
+}
+
+function isHungaryFeature(feature) {
+  const props = feature.properties || {};
+  return props.iso_a3 === 'HUN' || props.name === 'Hungary' || props.name_fr === 'Hongrie';
+}
+
+function countryKey(feature) {
+  const props = feature.properties || {};
+  return props.adm0_a3 || props.iso_a3 || props.name || props.name_fr;
+}
+
+function getCanvasPoint(event) {
+  const rect = scratchCanvas.getBoundingClientRect();
+  return {
+    x: (event.clientX - rect.left) * (WIDTH / rect.width),
+    y: (event.clientY - rect.top) * (HEIGHT / rect.height)
+  };
+}
+
+function roundRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+</script>
+</body>
+</html>
