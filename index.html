@@ -177,177 +177,6 @@
     80%{transform:translateX(4px)}
   }
 
-  /* ── Mission terminal ── */
-  .mission-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 120;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background:
-      radial-gradient(circle at 25% 20%, rgba(232,120,154,.32), transparent 34%),
-      radial-gradient(circle at 80% 82%, rgba(246,216,96,.18), transparent 34%),
-      linear-gradient(135deg, #fff8f5, #f9dbe7);
-    animation: fadeIn .45s ease;
-  }
-  .mission-overlay.show { display: flex; }
-  .mission-panel {
-    width: min(920px, 100%);
-    height: min(680px, calc(100vh - 40px));
-    border: 1px solid rgba(232,120,154,.58);
-    border-radius: 8px;
-    background: linear-gradient(180deg, rgba(58,32,48,.98), rgba(32,18,31,.98));
-    box-shadow: 0 24px 80px rgba(200,100,130,.32), inset 0 0 42px rgba(232,120,154,.12);
-    color: #fff8f5;
-    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
-  }
-  .mission-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      rgba(255,248,245,.04) 0,
-      rgba(255,248,245,.04) 1px,
-      transparent 1px,
-      transparent 5px
-    );
-    mix-blend-mode: screen;
-    opacity: .38;
-  }
-  .mission-topbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 14px 18px;
-    border-bottom: 1px solid rgba(232,120,154,.32);
-    background: rgba(255,248,245,.06);
-    color: #f5c6d8;
-    font-size: .78rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-  }
-  .terminal-output {
-    position: relative;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 24px;
-    padding-bottom: 90px;
-    font-size: clamp(.85rem, 2vw, 1rem);
-    line-height: 1.75;
-  }
-  .terminal-line {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    min-height: 1.75em;
-    color: #fff8f5;
-    text-shadow: 0 0 12px rgba(232,120,154,.24);
-  }
-  .terminal-line.dim { color: #e8a4bc; }
-  .terminal-line.warning { color: #f6d860; }
-  .terminal-line.flight {
-    margin: 10px 0;
-    padding: 8px 12px;
-    border: 1px solid rgba(246,216,96,.68);
-    background: linear-gradient(90deg, rgba(246,216,96,.15), rgba(232,120,154,.16));
-    color: #fff0b8;
-    font-weight: 700;
-    letter-spacing: .08em;
-  }
-  .prompt { color: #f5c6d8; flex: 0 0 auto; }
-  .cursor::after {
-    content: "_";
-    display: inline-block;
-    color: #f5c6d8;
-    animation: blink .75s steps(2, start) infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-  .progress-row {
-    margin: 12px 0 18px;
-    color: #f5c6d8;
-  }
-  .progress-label {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 6px;
-    font-size: .78rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
-  .progress-track {
-    height: 12px;
-    border: 1px solid rgba(245,198,216,.5);
-    background: rgba(255,248,245,.08);
-    overflow: hidden;
-  }
-  .progress-fill {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #e8789a, #f6d860);
-    box-shadow: 0 0 18px rgba(232,120,154,.42);
-    transition: width .12s linear;
-  }
-  .date-result { color: #fff0b8; font-weight: 700; }
-  .terminal-error {
-    margin-top: 12px;
-    color: #ff4d6d;
-    font-size: clamp(1.35rem, 6vw, 3rem);
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-shadow: 2px 0 #f5c6d8, -2px 0 #f6d860, 0 0 24px rgba(255,77,109,.55);
-    animation: glitch .32s steps(2, end) infinite;
-  }
-  @keyframes glitch {
-    0% { transform: translate(0); filter: hue-rotate(0deg); }
-    20% { transform: translate(-2px, 1px); }
-    40% { transform: translate(2px, -1px); }
-    60% { transform: translate(-1px, -2px); }
-    80% { transform: translate(2px, 2px); }
-    100% { transform: translate(0); filter: hue-rotate(18deg); }
-  }
-  .mission-actions {
-    display: none;
-    position: absolute;
-    right: 18px;
-    bottom: 18px;
-    z-index: 1;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-  .mission-actions.show { display: flex; }
-  .mission-button {
-    background: #fff8f5;
-    color: #3a2030;
-    border: none;
-    border-radius: 6px;
-    padding: 11px 18px;
-    font-size: .86rem;
-    cursor: pointer;
-    font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-  .mission-button:hover { background: #f6d860; }
-  .mission-button.primary {
-    background: #f6d860;
-    color: #3a2030;
-    box-shadow: 0 0 22px rgba(246,216,96,.24);
-  }
-  .mission-button.primary:hover { background: #fff0b8; }
-
   /* ── Confetti ── */
   .confetti { position:fixed; pointer-events:none; inset:0; overflow:hidden; z-index:99; }
   .confetti-piece {
@@ -383,19 +212,10 @@
     .sidebar { width: 100%; max-width: 380px; min-width: 0; }
     .word-list { padding: 16px 18px; }
     .word-item { padding: 7px 0; }
-    .mission-overlay { padding: 10px; }
-    .mission-panel { height: calc(100svh - 20px); }
-    .mission-topbar { flex-direction: column; gap: 6px; }
-    .terminal-output { padding: 16px; padding-bottom: 116px; font-size: .78rem; }
-    .terminal-line { gap: 7px; }
-    .mission-actions { left: 14px; right: 14px; bottom: 14px; justify-content: stretch; }
-    .mission-button { flex: 1 1 100%; min-height: 46px; padding: 13px 12px; text-align: center; }
-    .terminal-error { font-size: clamp(1.15rem, 9vw, 2rem); }
   }
 
   @media (max-width: 360px) {
     .grid-wrap { max-width: 340px; }
-    .terminal-output { font-size: .72rem; }
   }
 </style>
 </head>
@@ -429,19 +249,6 @@
 </div>
 
 <div class="confetti" id="confetti"></div>
-<div class="mission-overlay" id="mission">
-  <div class="mission-panel">
-    <div class="mission-topbar">
-      <span>Mission secrète // Fête des Mères</span>
-      <span>Accès voyageuse : autorisé</span>
-    </div>
-    <div class="terminal-output" id="terminalOutput"></div>
-    <div class="mission-actions" id="missionActions">
-      <a class="mission-button primary" href="carte_grattage.html">Trouve la destination</a>
-      <button class="mission-button" onclick="location.reload()">Relancer la grille</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ── Data injected by Python ──────────────────────────────────
@@ -472,10 +279,6 @@ const foundEl = document.getElementById('found');
 const totalEl = document.getElementById('total');
 const secretBox = document.getElementById('secretBox');
 const secretWordEl = document.getElementById('secretWord');
-const missionEl = document.getElementById('mission');
-const terminalOutputEl = document.getElementById('terminalOutput');
-const missionActionsEl = document.getElementById('missionActions');
-let missionStarted = false;
 
 totalEl.textContent = WORDS.length;
 
@@ -565,127 +368,9 @@ function revealSecret() {
   secretWordEl.textContent = SECRET_WORD;
   secretBox.classList.add('show');
   spawnConfetti();
-  setTimeout(startMissionSequence, 6800);
-}
-
-const missionSteps = [
-  { type: 'line', text: 'INITIALISATION DU SYSTÈME...', tone: 'dim' },
-  { type: 'line', text: 'Connexion chiffrée établie.' },
-  { type: 'line', text: 'Chargement du profil voyageuse...' },
-  { type: 'progress', label: 'Profil voyageuse' },
-  { type: 'line', text: 'Critères : culture · gastronomie · architecture.' },
-  { type: 'dates' },
-  { type: 'line', text: 'Recherche de la destination parfaite...' },
-  { type: 'progress', label: 'Destination parfaite' },
-  { type: 'line', text: '⚠ DONNÉES CRYPTÉES — DÉCRYPTAGE EN COURS', tone: 'warning' },
-  { type: 'line', text: 'VOL RYANAIR TROUVÉ', tone: 'flight' },
-  { type: 'line', text: 'Coordonnées GPS : 47.4979° N, 19.0402° E' },
-  { type: 'line', text: 'Analyse des coordonnées GPS...' },
-  { type: 'error' }
-];
-
-const dateCandidates = [
-  '12 Mai au 16 Mai',
-  '15 Mai au 19 Mai',
-  '18 Mai au 22 Mai',
-  '21 Mai au 25 Mai',
-  '24 Mai au 28 Mai',
-  '27 Mai au 31 Mai',
-  '31 Mai au 4 Juin',
-  '2 Juin au 6 Juin',
-  '4 Juin au 8 Juin',
-  '5 Juin au 9 Juin',
-  '7 Juin au 11 Juin',
-  '8 Juin au 12 Juin',
-  '10 Juin au 14 Juin',
-  '9 Juin au 13 Juin'
-];
-
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-function startMissionSequence() {
-  if (missionStarted) return;
-  missionStarted = true;
-  missionEl.classList.add('show');
-  terminalOutputEl.innerHTML = '';
-  missionActionsEl.classList.remove('show');
-  runMissionSequence();
-}
-
-async function runMissionSequence() {
-  for (const step of missionSteps) {
-    if (step.type === 'line') await typeTerminalLine(step.text, step.tone);
-    if (step.type === 'progress') await runProgressBar(step.label);
-    if (step.type === 'dates') await runDateSearch();
-    if (step.type === 'error') await showTerminalError();
-    terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight;
-  }
-  missionActionsEl.classList.add('show');
-}
-
-async function typeTerminalLine(text, tone = '') {
-  const line = document.createElement('div');
-  line.className = `terminal-line ${tone}`.trim();
-  const prompt = document.createElement('span');
-  prompt.className = 'prompt';
-  prompt.textContent = '>';
-  const content = document.createElement('span');
-  content.className = 'cursor';
-  line.append(prompt, content);
-  terminalOutputEl.appendChild(line);
-
-  for (const ch of text) {
-    content.textContent += ch;
-    await delay(ch === ' ' ? 12 : 28);
-  }
-  content.classList.remove('cursor');
-  await delay(240);
-}
-
-async function runProgressBar(label) {
-  const row = document.createElement('div');
-  row.className = 'progress-row';
-  row.innerHTML = `
-    <div class="progress-label"><span>${label}</span><span class="progress-value">0%</span></div>
-    <div class="progress-track"><div class="progress-fill"></div></div>
-  `;
-  terminalOutputEl.appendChild(row);
-  const fill = row.querySelector('.progress-fill');
-  const value = row.querySelector('.progress-value');
-  for (let pct = 0; pct <= 100; pct += 5) {
-    fill.style.width = `${pct}%`;
-    value.textContent = `${pct}%`;
-    await delay(72);
-  }
-  await delay(360);
-}
-
-async function runDateSearch() {
-  const line = document.createElement('div');
-  line.className = 'terminal-line';
-  const prompt = document.createElement('span');
-  prompt.className = 'prompt';
-  prompt.textContent = '>';
-  const label = document.createElement('span');
-  label.textContent = 'Recherche des dates → ';
-  const date = document.createElement('span');
-  line.append(prompt, label, date);
-  terminalOutputEl.appendChild(line);
-
-  for (const candidate of dateCandidates) {
-    date.textContent = candidate;
-    await delay(candidate === '9 Juin au 13 Juin' ? 700 : 300);
-  }
-  date.className = 'date-result';
-  await delay(320);
-}
-
-async function showTerminalError() {
-  const error = document.createElement('div');
-  error.className = 'terminal-error';
-  error.textContent = 'ERROR ERROR';
-  terminalOutputEl.appendChild(error);
-  await delay(1100);
+  setTimeout(() => {
+    window.location.href = 'terminal.html';
+  }, 6800);
 }
 
 function spawnConfetti() {
