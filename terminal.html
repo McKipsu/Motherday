@@ -148,23 +148,69 @@
 
   .date-result { color: #fff0b8; font-weight: 700; }
 
-  .terminal-error {
-    margin-top: 12px;
-    color: #ff4d6d;
-    font-size: clamp(1.35rem, 6vw, 3rem);
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-shadow: 2px 0 var(--blush), -2px 0 var(--gold), 0 0 24px rgba(255,77,109,.55);
-    animation: glitch .32s steps(2, end) infinite;
+  .decrypt-block {
+    margin: 12px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid rgba(246,216,96,.48);
+    background:
+      linear-gradient(90deg, rgba(246,216,96,.1), rgba(232,120,154,.12)),
+      rgba(255,248,245,.045);
+    box-shadow: inset 0 0 22px rgba(246,216,96,.08), 0 0 26px rgba(232,120,154,.12);
+    overflow: hidden;
   }
 
-  @keyframes glitch {
-    0% { transform: translate(0); filter: hue-rotate(0deg); }
-    20% { transform: translate(-2px, 1px); }
-    40% { transform: translate(2px, -1px); }
-    60% { transform: translate(-1px, -2px); }
-    80% { transform: translate(2px, 2px); }
-    100% { transform: translate(0); filter: hue-rotate(18deg); }
+  .decrypt-title {
+    margin-bottom: 8px;
+    color: var(--gold);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .decrypt-grid {
+    display: grid;
+    gap: 3px;
+    color: #f5c6d8;
+    font-size: .78rem;
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+
+  .decrypt-grid span {
+    opacity: .86;
+    text-shadow: 0 0 12px rgba(232,120,154,.36);
+  }
+
+  .decrypt-grid span:nth-child(2n) { color: #fff0b8; opacity: .72; }
+
+  .decrypt-lock {
+    color: #fff0b8;
+    text-shadow: 0 0 16px rgba(246,216,96,.36);
+  }
+
+  .terminal-alert {
+    margin-top: 12px;
+    color: #fff0b8;
+    font-size: clamp(1.2rem, 5vw, 2.35rem);
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-shadow: 0 0 22px rgba(246,216,96,.36), 0 0 8px rgba(232,120,154,.28);
+    animation: signalPulse 1.05s ease-in-out infinite;
+  }
+
+  .terminal-alert-sub {
+    margin-top: 4px;
+    color: var(--blush);
+    font-size: .82rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  @keyframes signalPulse {
+    0%, 100% { opacity: .9; transform: translateX(0); }
+    35% { opacity: .58; transform: translateX(-1px); }
+    70% { opacity: 1; transform: translateX(1px); }
   }
 
   .mission-actions {
@@ -213,7 +259,8 @@
     .terminal-line { gap: 7px; }
     .mission-actions { left: 14px; right: 14px; bottom: 14px; justify-content: stretch; }
     .mission-button { flex: 1 1 100%; min-height: 46px; padding: 13px 12px; text-align: center; }
-    .terminal-error { font-size: clamp(1.15rem, 9vw, 2rem); }
+    .decrypt-grid { font-size: .68rem; letter-spacing: .03em; }
+    .terminal-alert { font-size: clamp(1.05rem, 8vw, 1.75rem); }
   }
 
   @media (max-width: 360px) {
@@ -230,7 +277,6 @@
   <div class="terminal-output" id="terminalOutput"></div>
   <div class="mission-actions" id="missionActions">
     <a class="mission-button primary" href="carte_grattage.html">Trouve la destination</a>
-    <a class="mission-button" href="index.html">Relancer la grille</a>
   </div>
 </main>
 
@@ -247,27 +293,30 @@ const missionSteps = [
   { type: 'dates' },
   { type: 'line', text: 'Recherche de la destination parfaite...' },
   { type: 'progress', label: 'Destination parfaite' },
-  { type: 'line', text: '⚠ DONNÉES CRYPTÉES — DÉCRYPTAGE EN COURS', tone: 'warning' },
-  { type: 'line', text: 'VOL RYANAIR TROUVÉ', tone: 'flight' },
+  { type: 'decrypt' },
+  { type: 'line', text: 'VOL RYANAIR FR1651 TROUVÉ', tone: 'flight' },
   { type: 'line', text: 'Coordonnées GPS : 47.4979° N, 19.0402° E' },
   { type: 'line', text: 'Analyse des coordonnées GPS...' },
   { type: 'error' }
 ];
 
 const dateCandidates = [
-  '12 Mai au 16 Mai',
-  '15 Mai au 19 Mai',
-  '18 Mai au 22 Mai',
-  '21 Mai au 25 Mai',
-  '24 Mai au 28 Mai',
-  '27 Mai au 31 Mai',
-  '31 Mai au 4 Juin',
-  '2 Juin au 6 Juin',
-  '4 Juin au 8 Juin',
-  '5 Juin au 9 Juin',
-  '7 Juin au 11 Juin',
-  '8 Juin au 12 Juin',
-  '10 Juin au 14 Juin',
+'13 Juin au 17 Juin',
+'28 Mai au 3 Juin',
+'17 Mai au 21 Mai',
+'5 Juin au 9 Juin',
+'24 Juin au 28 Juin',
+'9 Mai au 13 Mai',
+'31 Mai au 5 Juin',
+'21 Juin au 25 Juin',
+'3 Mai au 7 Mai',
+'15 Juin au 21 Juin',
+'26 Mai au 1 Juin',
+'14 Mai au 18 Mai',
+'10 Juin au 14 Juin',
+'6 Mai au 11 Mai',
+'18 Juin au 22 Juin',
+'23 Mai au 27 Mai',
   '9 Juin au 13 Juin'
 ];
 
@@ -280,6 +329,7 @@ async function runMissionSequence() {
     if (step.type === 'line') await typeTerminalLine(step.text, step.tone);
     if (step.type === 'progress') await runProgressBar(step.label);
     if (step.type === 'dates') await runDateSearch();
+    if (step.type === 'decrypt') await runDecryptAnimation();
     if (step.type === 'error') await showTerminalError();
     terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight;
   }
@@ -343,11 +393,59 @@ async function runDateSearch() {
   await delay(320);
 }
 
+function randomCode(length) {
+  const alphabet = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&$*<>[]{}';
+  let value = '';
+  for (let i = 0; i < length; i++) {
+    value += alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return value;
+}
+
+async function runDecryptAnimation() {
+  const block = document.createElement('div');
+  block.className = 'decrypt-block';
+  const title = document.createElement('div');
+  title.className = 'decrypt-title';
+  title.textContent = 'DONNÉES CRYPTÉES — DÉCRYPTAGE EN COURS';
+  const grid = document.createElement('div');
+  grid.className = 'decrypt-grid';
+  const rows = Array.from({ length: 5 }, () => {
+    const row = document.createElement('span');
+    row.textContent = randomCode(36);
+    grid.appendChild(row);
+    return row;
+  });
+  block.append(title, grid);
+  terminalOutputEl.appendChild(block);
+
+  const scramble = setInterval(() => {
+    rows.forEach((row, index) => {
+      row.textContent = `${randomCode(12)}::${randomCode(index === 2 ? 16 : 20)}`;
+    });
+    terminalOutputEl.scrollTop = terminalOutputEl.scrollHeight;
+  }, 85);
+
+  await delay(2450);
+  clearInterval(scramble);
+  title.textContent = 'DÉCRYPTAGE PARTIEL TERMINÉ';
+  rows[0].textContent = 'CLE VOYAGEUSE // VALIDEE';
+  rows[1].textContent = 'INDEX VOL // ISOLE';
+  rows[2].textContent = 'COORDONNEES GPS // RESTAUREES';
+  rows[3].textContent = 'DESTINATION // PROTEGEE';
+  rows[4].textContent = 'NIVEAU SECRET // MAMAN';
+  rows.forEach(row => row.classList.add('decrypt-lock'));
+  await delay(520);
+}
+
 async function showTerminalError() {
-  const error = document.createElement('div');
-  error.className = 'terminal-error';
-  error.textContent = 'ERROR ERROR';
-  terminalOutputEl.appendChild(error);
+  const alert = document.createElement('div');
+  alert.className = 'terminal-alert';
+  alert.textContent = 'SIGNAL BROUILLÉ';
+  const sub = document.createElement('div');
+  sub.className = 'terminal-alert-sub';
+  sub.textContent = 'destination verrouillée';
+  terminalOutputEl.append(alert, sub);
   await delay(1100);
 }
 </script>
